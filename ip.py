@@ -27,6 +27,18 @@ class IP:
             # atua como roteador
             next_hop = self._next_hop(dst_addr)
             # TODO: Trate corretamente o campo TTL do datagrama
+            vihl, dscpecn, total_len, identification, flagsfrag, ttl, proto, \
+                    checksum, src_addr, dest_addr = \
+                    struct.unpack('!BBHHHBBHII', datagrama[:20])
+            ttl_ = ttl - 1
+            if ttl_ != 0:
+                pack = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, proto, 0, src_addr, dest_addr) + datagrama[20:]
+                checksum = calc_checksum(pack)
+                datagrama = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, proto, checksum, src_addr, dest_addr) + datagrama[20:] + payload
+            else:
+                pack = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, IPPROTO_ICMP, 0, src_addr, str2addr("1.2.3.4"))
+                checksum = calc_checksum(pack)
+                datagrama = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, IPPROTO_ICMP, checksum, src_addr, str2addr("1.2.3.4"))
             self.enlace.enviar(datagrama, next_hop)
 
     def _next_hop(self, dest_addr):
