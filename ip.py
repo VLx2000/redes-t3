@@ -71,6 +71,15 @@ class IP:
         (string no formato x.y.z.w).
         """
         next_hop = self._next_hop(dest_addr)
-        # TODO: Assumindo que a camada superior é o protocolo TCP, monte o
-        # datagrama com o cabeçalho IP, contendo como payload o segmento.
-        self.enlace.enviar(datagrama, next_hop)
+        # TODO: Assumindo que a camada superior é o protocolo TCP, monte o datagrama com o cabeçalho IP, contendo como payload o segmento.
+        # n sei quais valores colocar, o tam do datagrama eh 12 caracteres menor q o esperado
+        vihl = 0
+        dscpecn = 0
+        total_len = 0
+        identification = 0
+        flagsfrag = 0
+        ttl = 0
+        proto = 0
+        datagrama = str2addr(self.meu_endereco) + str2addr(dest_addr) + segmento # + vihl + dscpecn + total_len + identification + flagsfrag + ttl + proto
+        #print(datagrama)
+        self.enlace.enviar(bytes(datagrama), next_hop)
