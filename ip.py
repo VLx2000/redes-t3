@@ -30,15 +30,15 @@ class IP:
             vihl, dscpecn, total_len, identification, flagsfrag, ttl, proto, \
                     checksum, src_addr, dest_addr = \
                     struct.unpack('!BBHHHBBHII', datagrama[:20])
-            ttl_ = ttl - 1
-            if ttl_ != 0:
-                pack = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, proto, 0, src_addr, dest_addr) + datagrama[20:]
+            ttl = ttl - 1
+            if ttl != 0:
+                pack = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl, proto, 0, src_addr, dest_addr) + datagrama[20:]
                 checksum = calc_checksum(pack)
-                datagrama = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, proto, checksum, src_addr, dest_addr) + datagrama[20:] + payload
+                datagrama = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl, proto, checksum, src_addr, dest_addr) + datagrama[20:] + payload
             else:
-                pack = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, IPPROTO_ICMP, 0, src_addr, str2addr("1.2.3.4"))
+                pack = struct.pack('!BBHHHBBH', vihl, dscpecn, total_len, identification, flagsfrag, ttl, IPPROTO_ICMP, 0) + str2addr(self.meu_endereco) + str2addr('1.2.3.4')
                 checksum = calc_checksum(pack)
-                datagrama = struct.pack('!BBHHHBBHII', vihl, dscpecn, total_len, identification, flagsfrag, ttl_, IPPROTO_ICMP, checksum, src_addr, str2addr("1.2.3.4"))
+                datagrama = struct.pack('!BBHHHBBH', vihl, dscpecn, total_len, identification, flagsfrag, ttl, IPPROTO_ICMP, checksum) + str2addr(self.meu_endereco) + str2addr('1.2.3.4')
             self.enlace.enviar(datagrama, next_hop)
 
     def _next_hop(self, dest_addr):
