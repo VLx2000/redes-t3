@@ -14,6 +14,7 @@ class IP:
         self.enlace.registrar_recebedor(self.__raw_recv)
         self.ignore_checksum = self.enlace.ignore_checksum
         self.meu_endereco = None
+        self.identificador = 0
 
     def __raw_recv(self, datagrama):
         dscp, ecn, identification, flags, frag_offset, ttl, proto, \
@@ -72,14 +73,20 @@ class IP:
         """
         next_hop = self._next_hop(dest_addr)
         # TODO: Assumindo que a camada superior é o protocolo TCP, monte o datagrama com o cabeçalho IP, contendo como payload o segmento.
-        # n sei quais valores colocar, o tam do datagrama eh 12 caracteres menor q o esperado
-        vihl = 0
-        dscpecn = 0
-        total_len = 0
-        identification = 0
-        flagsfrag = 0
-        ttl = 0
-        proto = 0
-        datagrama = str2addr(self.meu_endereco) + str2addr(dest_addr) + segmento # + vihl + dscpecn + total_len + identification + flagsfrag + ttl + proto
+
+        vihl = 69
+        dscpecn = 000
+        total_len = 20 + len(segmento)
+        identification = self.identificador
+        flagsfrag = 00
+        ttl = 64
+        proto = IPPROTO_TCP
+        checksum = 0
+        pack = struct.pack('!BBHHHBBH', vihl, dscpecn, total_len, identification, flagsfrag, ttl, proto, checksum) + str2addr(self.meu_endereco) + str2addr(dest_addr)
+        checksum = calc_checksum(pack)
+        #print(checksum)
+        datagrama = struct.pack('!BBHHHBBH', vihl, dscpecn, total_len, identification, flagsfrag, ttl, proto, checksum) + str2addr(self.meu_endereco) + str2addr(dest_addr) + segmento
         #print(datagrama)
-        self.enlace.enviar(bytes(datagrama), next_hop)
+        #print(segmento)
+        self.identificador += 1
+        self.enlace.enviar(datagrama, next_hop)
