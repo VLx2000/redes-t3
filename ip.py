@@ -34,10 +34,19 @@ class IP:
         # (next_hop) a partir do endereço de destino do datagrama (dest_addr).
         # Retorne o next_hop para o dest_addr fornecido.
         
+        maior = -1
+        content_to_return = None
         for content in self.tabela:
             if ipaddress.ip_address(dest_addr) in ipaddress.ip_network(content[0]):
-                return content[1]
-        
+                str_prefix = str(ipaddress.ip_network(content[0]))
+                actual_prefix_number = int(str_prefix.split("/")[1])
+                actual_content = content[1]
+    
+                if actual_prefix_number > maior:
+                    maior = actual_prefix_number
+                    content_to_return = actual_content
+                
+        return content_to_return
 
     def definir_endereco_host(self, meu_endereco):
         """
